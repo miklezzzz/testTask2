@@ -164,3 +164,5 @@ workflows:
             tags:
               only:
                 - /prodbuild-.*/
+            branches:
+              ignore: /.*/
