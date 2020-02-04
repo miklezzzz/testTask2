@@ -18,3 +18,9 @@ jobs:
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             docker push $DOCKER_USER/simple-api-php:$TAG
             docker push $DOCKER_USER/simple-api-web:$TAG
+
+workflows:
+  version: 2
+  build-push:
+    jobs:
+      - buildAndPush:
