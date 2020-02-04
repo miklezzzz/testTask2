@@ -55,4 +55,5 @@ workflows:
           requires:
             - buildAndPush
           filters:
-            only: /release-.*/
+            only:
+              - /release-.*/
