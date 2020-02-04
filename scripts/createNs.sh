@@ -3,7 +3,7 @@
 NAMESPACE=$1
 
 kubectl get ns $NAMESPACE --insecure-skip-tls-verify=true
-if [ $? -ne 0]; then kubectl create ns $NAMESPACE --insecure-skip-tls-verify=true && kubectl get secret -n databases mysql -o yaml --export --insecure-skip-tls-verify=true | kubectl apply -n $NAMESPACE --insecure-skip-tls-verify=true -f - && cat <<EOF | kubectl appply -n $NAMESPACE -f -
+if [ $? -ne 0]; then kubectl create ns $NAMESPACE --insecure-skip-tls-verify=true && kubectl get secret -n databases mysql -o yaml --export --insecure-skip-tls-verify=true | kubectl apply -n $NAMESPACE --insecure-skip-tls-verify=true -f - && cat <<EOF | kubectl --insecure-skip-tls-verify=true appply -n $NAMESPACE -f -
 apiVersion: v1
 items:
 - apiVersion: v1
