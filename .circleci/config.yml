@@ -8,50 +8,51 @@ jobs:
       - setup_remote_docker:
       - run:
           name: Set the tag for the image
-          command:  if [ "$CIRCLE_BRANCH" == "develop" ]; then echo 'export TAG=develop >> $BASH_ENV'; elif [[ "$CIRCLE_BRANCH" == release-* ]]; then echo 'export TAG=release-$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV; elif [[ "$CIRCLE_TAG" == prodbuild* ]]; then echo 'export TAG=$CIRCLE_TAG-$CIRCLE_BUILD_NUM' >> $BASH_ENV; fi
+          command: if [ "$CIRCLE_BRANCH" == "develop" ]; then echo 'export TAG=develop' >> $BASH_ENV; elif [[ "$CIRCLE_BRANCH" == release-* ]]; then echo 'export TAG=${CIRCLE_BRANCH}' >> $BASH_ENV; elif [[ "$CIRCLE_TAG" == prodbuild* ]]; then echo 'export TAG=$CIRCLE_TAG' >> $BASH_ENV; fi
       - run:
           name: Build and push images
           command: |
-                 docker build -t $DOCKER_USER/simple-api-php:$TAG . -f Dockerfile.php
-                 docker build -t $DOCKER_USER/simple-api-web:$TAG . -f Dockerfile.web
-                 echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                 docker push $DOCKER_USER/simple-api-php:$TAG
-                 docker push $DOCKER_USER/simple-api-web:$TAG
+            docker build -t $DOCKER_USER/simple-api-php:$TAG . -f Dockerfile.php
+            docker build -t $DOCKER_USER/simple-api-web:$TAG . -f Dockerfile.web
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+            docker push $DOCKER_USER/simple-api-php:$TAG
+            docker push $DOCKER_USER/simple-api-web:$TAG
 
   deploy:
     docker:
       - image: circleci/buildpack-deps:bionic
     steps:
       - checkout
+      - setup_remote_docker:
       - run:
           name: Install and confgure kubectl
           command: sudo curl -L https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && sudo chmod +x /usr/local/bin/kubectl
-
       - run:
           name: Prepare kubeconfig
           command: |
-                 sed -i "s/east-k8s/$host/" ./.kube/config
-                 sed -i "s/west-k8s/$host/" ./.kube/config
-                 sed -i "s/admin-token/$token/" ./.kube/config
-                 mkdir -p ~/.kube && cp ./.kube/config ~/.kube/config
-
+            sed -i "s/east-k8s/$host/" ./.kube/config
+            sed -i "s/west-k8s/$host/" ./.kube/config
+            sed -i "s/admin-token/$token/" ./.kube/config
+            mkdir -p ~/.kube && cp ./.kube/config ~/.kube/config
       - run: 
           name: Install Helm
           command: |
-                 sudo curl https://get.helm.sh/helm-v3.0.3-linux-amd64.tar.gz -o /tmp/helm-v3.0.3-linux-amd64.tar.gz && cd /tmp && tar zxvf helm-v3.0.3-linux-amd64.tar.gz && sudo cp -v ./linux-amd64/helm /usr/local/bin/helm
-
+            sudo curl https://get.helm.sh/helm-v3.0.3-linux-amd64.tar.gz -o /tmp/helm-v3.0.3-linux-amd64.tar.gz && cd /tmp && tar zxvf helm-v3.0.3-linux-amd64.tar.gz && sudo cp -v ./linux-amd64/helm /usr/local/bin/helm
+      - run:
+          name: Get the tag for the image
+          command: if [ "${CIRCLE_BRANCH}" == "develop" ]; then echo 'export TAG=develop' >> $BASH_ENV; elif [[ "${CIRCLE_BRANCH}" == release-* ]]; then echo 'export TAG=${CIRCLE_BRANCH}' >> $BASH_ENV; elif [[ "${CIRCLE_TAG}" == prodbuild* ]]; then echo 'export TAG=$CIRCLE_TAG' >> $BASH_ENV; fi
+      - run:
+          name: Get namespace name
+          command: if [ "$TAG" == "develop" ]; then echo 'export NAMESPACE=develop' >> $BASH_ENV; elif [[ "$TAG" != prodbuild* ]]; then echo 'export NAMESPACE=$TAG' >> $BASH_ENV; else echo 'export NAMESPACE=production' >> $BASH_ENV; fi
+      - run:
+          name: Get pull policy
+          command: if [ "$TAG" == "develop" ] || [[ "$TAG" != prodbuild* ]]; then echo 'export PULLPOLICY=Always' >> $BASH_ENV; else echo 'export PULLPOLICY=IfNotPresent' >> $BASH_ENV; fi
       - run:
           name: Create Namespace
-          command: bash scripts/createNs.sh $TAG
-
+          command: kubectl config use-context kube-east && bash scripts/createNs.sh $NAMESPACE
       - run:
-          name: Test access to K8s
-          command: |
-                 kubectl config use-context kube-east
-                 kubectl get nodes --insecure-skip-tls-verify=true
-                 kubectl config use-context kube-west
-                 kubectl get nodes --insecure-skip-tls-verify=true
-                 echo $TAG
+          name: Install Helm release
+          command: helm upgrade --install simple-api --namespace $NAMESPACE ./helm-chart/ --set php.mysql.db=$NAMESPACE --set php.redis.ns=$NAMESPACE --set web.ingress.host=$NAMESPACE-east.95.215.71.23.nip.io --set php.tag=$TAG --set web.tag=$TAG --set timestamp="$(date +%s)" --set web.pullPolicy=$PULLPOLICY --set php.pullPolicy=$PULLPOLICY
 
 workflows:
   version: 2
@@ -62,6 +63,7 @@ workflows:
             branches:
               ignore:
                 - master
+                - develop
       - deploy:
           requires:
             - buildAndPush
