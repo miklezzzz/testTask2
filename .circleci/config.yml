@@ -9,14 +9,12 @@ jobs:
       - run:
           name: Set the tag for the image
           command:  echo 'export TAG=$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV
-      - run: 
-          name: Build docker images
-          command: |
-            docker build -t $DOCKER_USER/simple-api-php:$TAG . -f Dockerfile.php
-            docker build -t $DOCKER_USER/simple-api-web:$TAG . -f Dockerfile.web
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            docker push $DOCKER_USER/simple-api-php:$TAG
-            docker push $DOCKER_USER/simple-api-web:$TAG
+      - run: |
+          docker build -t $DOCKER_USER/simple-api-php:$TAG . -f Dockerfile.php
+          docker build -t $DOCKER_USER/simple-api-web:$TAG . -f Dockerfile.web
+          echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+          docker push $DOCKER_USER/simple-api-php:$TAG
+          docker push $DOCKER_USER/simple-api-web:$TAG
 
 workflows:
   version: 2
