@@ -40,9 +40,9 @@ jobs:
           name: Test access to K8s
           command: |
                  kubectl config use-context kube-east
-                 kubectl get nodes
+                 kubectl get nodes --insecure-skip-tls-verify=true
                  kubectl config use-context kube-west
-                 kubectl get nodes
+                 kubectl get nodes --insecure-skip-tls-verify=true
 
 workflows:
   version: 2
