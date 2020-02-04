@@ -27,7 +27,6 @@ jobs:
       - run:
           name: Install and confgure kubectl
           command: sudo curl -L https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && sudo chmod +x /usr/local/bin/kubectl
-
       - run:
           name: Prepare kubeconfig
           command: |
@@ -35,20 +34,17 @@ jobs:
                  sed -i "s/west-k8s/$host/" ./.kube/config
                  sed -i "s/admin-token/$token/" ./.kube/config
                  mkdir -p ~/.kube && cp ./.kube/config ~/.kube/config
-
       - run: 
           name: Install Helm
           command: |
                  sudo curl https://get.helm.sh/helm-v3.0.3-linux-amd64.tar.gz -o /tmp/helm-v3.0.3-linux-amd64.tar.gz && cd /tmp && tar zxvf helm-v3.0.3-linux-amd64.tar.gz && sudo cp -v ./linux-amd64/helm /usr/local/bin/helm
-
       - run:
           name: Set the tag for the image
           command: |
                  if [ "$CIRCLE_BRANCH" == "develop" ]; then echo 'export TAG=develop' >> $BASH_ENV; elif [[ "$CIRCLE_BRANCH" != release-* ]]; then echo 'export TAG=release-$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV; elif [[ "$CIRCLE_TAG" == prodbuild* ]]; then echo 'export TAG=$CIRCLE_TAG-$CIRCLE_BUILD_NUM' >> $BASH_ENV; fi
-                 echo $CIRCLE_BRANCH
+                 echo "$CIRCLE_BRANCH"
                  echo $TAG
                  echo $NAMESPACE
-
       - run:
           name: Create Namespace
           command: |
