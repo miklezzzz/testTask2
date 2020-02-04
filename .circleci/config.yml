@@ -47,4 +47,4 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - deployToStage:
+      - deployToStage
