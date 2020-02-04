@@ -18,8 +18,41 @@ jobs:
                  docker push $DOCKER_USER/simple-api-php:$TAG
                  docker push $DOCKER_USER/simple-api-web:$TAG
 
+  deployToStage:
+    docker:
+      - image: circleci/buildpack-deps:bionic
+    steps:
+      - run:
+          name: Set the tag for the image
+          command:  echo 'export TAG=$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV
+      - run:
+          name: Install and confgure kubectl
+          command: sudo curl -L https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && sudo chmod +x /usr/local/bin/kubectl
+      - run:
+          name: Prepare kubeconfig
+          command: |
+                 sed -i 's/east-k8s/$host/' ./.kube/config
+                 sed -i 's/west-k8s/$host/' ./.kube/config
+                 sed -i 's/admin-token/$token/' ./.kube/config
+                 mkdir -p ~/.kube && cp ./.kube/config ~/.kube/config
+      - run:
+          name: Test access to K8s
+          command: |
+                 kubectl config use-context kube-east
+                 kubectl get nodes
+                 kubectl config use-context kube-west
+                 kubectl get nodes
+
 workflows:
   version: 2
   build-push:
     jobs:
       - buildAndPush
+      - deployToStage
+  to-staging:
+    jobs:
+      - deployToStage:
+          requires:
+            - buildAndPush
+          filters:
+            only: /release-.*/
