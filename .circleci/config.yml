@@ -8,7 +8,7 @@ jobs:
       - setup_remote_docker:
       - run:
           name: Set the tag for the image
-          command:  echo 'export TAG=$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV
+          command:  if [ "$CIRCLE_BRANCH" == "develop" ]; then echo 'export TAG=develop >> $BASH_ENV'; elif [[ "$CIRCLE_BRANCH" == release-* ]]; then echo 'export TAG=release-$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV; elif [[ "$CIRCLE_TAG" == prodbuild* ]]; then echo 'export TAG=$CIRCLE_TAG-$CIRCLE_BUILD_NUM' >> $BASH_ENV; fi
       - run:
           name: Build and push images
           command: |
@@ -18,17 +18,15 @@ jobs:
                  docker push $DOCKER_USER/simple-api-php:$TAG
                  docker push $DOCKER_USER/simple-api-web:$TAG
 
-  deployToStage:
+  deploy:
     docker:
       - image: circleci/buildpack-deps:bionic
     steps:
       - checkout
       - run:
-          name: Set the tag for the image
-          command:  echo 'export TAG=$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV
-      - run:
           name: Install and confgure kubectl
           command: sudo curl -L https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && sudo chmod +x /usr/local/bin/kubectl
+
       - run:
           name: Prepare kubeconfig
           command: |
@@ -36,6 +34,65 @@ jobs:
                  sed -i "s/west-k8s/$host/" ./.kube/config
                  sed -i "s/admin-token/$token/" ./.kube/config
                  mkdir -p ~/.kube && cp ./.kube/config ~/.kube/config
+
+      - run: 
+          name: Install Helm
+          command: |
+                 sudo curl https://get.helm.sh/helm-v3.0.3-linux-amd64.tar.gz -o /tmp/helm-v3.0.3-linux-amd64.tar.gz && cd /tmp && tar zxvf helm-v3.0.3-linux-amd64.tar.gz && sudo cp -v ./linux-amd64/helm /usr/local/bin/helm
+
+      - run:
+          name: Create Namespace
+          command: |
+                 if [ "$TAG" == "develop"]; then echo 'export NAMESPACE=develop' >> $BASH_ENV; elif [[ "$TAG" =! prodbuild* ]]; then echo 'export NAMESPACE=$TAG' >> $BASH_ENV; else echo 'export NAMESPACE=production' >> $BASH_ENV; fi
+                 kubectl config use-context kube-east
+                 kubectl get ns $NAMESPACE --insecure-skip-tls-verify=true
+                 if [ $? -ne 0]; then kubectl create ns $NAMESPACE --insecure-skip-tls-verify=true && kubectl get secret -n databases mysql -o yaml --export --insecure-skip-tls-verify=true | kubectl apply -n $NAMESPACE --insecure-skip-tls-verify=true -f - && cat <<EOF | kubectl appply -n $NAMESPACE -f -
+---
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: mongodb
+  spec:
+    externalName: mongodb.databases.svc.cluster.local
+    ports:
+    - name: mongodb
+      port: 27017
+      protocol: TCP
+      targetPort: mongodb
+    sessionAffinity: None
+    type: ExternalName
+---
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: mysql
+  spec:
+    externalName: mysql.databases.svc.cluster.local
+    ports:
+    - name: mysql
+      port: 3306
+      protocol: TCP
+      targetPort: mysql
+    sessionAffinity: None
+    type: ExternalName
+---
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: redis-master
+  spec:
+    externalName: redis-master.databases.svc.cluster.local
+    ports:
+    - name: redis
+      port: 6379
+      protocol: TCP
+      targetPort: redis
+    sessionAffinity: None
+    type: ExternalName
+EOF
+
       - run:
           name: Test access to K8s
           command: |
@@ -43,9 +100,17 @@ jobs:
                  kubectl get nodes --insecure-skip-tls-verify=true
                  kubectl config use-context kube-west
                  kubectl get nodes --insecure-skip-tls-verify=true
+                 echo $TAG
 
 workflows:
   version: 2
   build-deploy:
     jobs:
-      - deployToStage
+      - buildAndPush:
+          filters:
+            branches:
+              ignore:
+                - master
+      - deploy:
+          requires:
+            - buildAndPush
