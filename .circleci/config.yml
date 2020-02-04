@@ -133,8 +133,16 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - lint
-      - test
+      - lint:
+          filters:
+            branches:
+              ignore:
+                - master
+      - test:
+          filters:
+            branches:
+              ignore:
+                - master
       - buildAndPush:
           filters:
             branches:
