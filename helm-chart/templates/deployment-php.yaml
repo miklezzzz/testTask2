@@ -1,8 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    timestamp: {{ .Values.timestamp | quote }}
   labels:
     app: simple-api
     level: php
@@ -23,6 +21,8 @@ spec:
   template:
     metadata:
       creationTimestamp: null
+      annotations:
+        timestamp: {{ .Values.timestamp | quote }}
       labels:
         app: simple-api
         level: php
