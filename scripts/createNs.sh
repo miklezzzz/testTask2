@@ -8,8 +8,6 @@ then
     kubectl create ns $NAMESPACE --insecure-skip-tls-verify=true 
     kubectl get secret -n databases mysql -o yaml --export --insecure-skip-tls-verify=true | kubectl apply -n $NAMESPACE --insecure-skip-tls-verify=true -f - 
     cat <<EOF | kubectl --insecure-skip-tls-verify=true apply -n $NAMESPACE -f -
-apiVersion: v1
-items:
 - apiVersion: v1
   kind: Service
   metadata:
