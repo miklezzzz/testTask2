@@ -52,7 +52,7 @@ jobs:
           command: kubectl config use-context kube-east && bash scripts/createNs.sh $NAMESPACE
       - run:
           name: Install Helm release
-          command: helm upgrade --install simple-api --namespace $NAMESPACE ./helm-chart/ --set php.mysql.db=$NAMESPACE --set php.redis.ns=$NAMESPACE --set web.ingress.host=$NAMESPACE-east.95.215.71.23.nip.io --set php.tag=$TAG --set web.tag=$TAG --set timestamp=$(date +%s) --set web.pullPolicy=$PULLPOLICY --set php.pullPolicy=$PULLPOLICY
+          command: helm upgrade --install simple-api --namespace $NAMESPACE ./helm-chart/ --set php.mysql.db=$NAMESPACE --set php.redis.ns=$NAMESPACE --set web.ingress.host=$NAMESPACE-east.95.215.71.23.nip.io --set php.tag=$TAG --set web.tag=$TAG --set timestamp="$(date +%s)" --set web.pullPolicy=$PULLPOLICY --set php.pullPolicy=$PULLPOLICY
 
 workflows:
   version: 2

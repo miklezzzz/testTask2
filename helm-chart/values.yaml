@@ -24,3 +24,4 @@ web:
   pullPolicy: Always
   ingress:
     host: foobar
+timestamp: "1"
