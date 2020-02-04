@@ -15,7 +15,7 @@ php:
     db: simple-api
   redis:
     port: 6379
-    db: "0"
+    db: 0
     host: redis-master
     ns: foobar
 web:
@@ -24,4 +24,4 @@ web:
   pullPolicy: Always
   ingress:
     host: foobar
-timestamp: "1"
+timestamp: 1

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    timestamp: {{ .Values.timestamp }}
+    timestamp: {{ .Values.timestamp | quote }}
   labels:
     app: simple-api
     level: nginx
