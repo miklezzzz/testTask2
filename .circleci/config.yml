@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-        docker_layer_caching: true
+          docker_layer_caching: true
       - run:
           name: Set the tag for the image
           command:  echo 'export TAG=$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV
