@@ -92,11 +92,11 @@ jobs:
 
       - run:
           name: EAST - Create Namespace && Deploy Release
-          command: kubectl config use-context kube-east && bash scripts/createNs.sh $CIRLCE_BRANCH && helm upgrade --install simple-api --namespace $CIRLCE_BRANCH ./helm-chart/ --set php.mysql.db=$CIRLCE_BRANCH --set php.redis.ns=$CIRLCE_BRANCH --set web.ingress.host=$CIRLCE_BRANCH-east.95.215.71.23.nip.io --set php.tag=$CIRLCE_BRANCH --set web.tag=$CIRLCE_BRANCH --set timestamp="$(date +%s)" --set web.pullPolicy=Always --set php.pullPolicy=Always
+          command: kubectl config use-context kube-east && bash scripts/createNs.sh $CIRCLE_BRANCH && helm upgrade --install simple-api --namespace $CIRCLE_BRANCH ./helm-chart/ --set php.mysql.db=$CIRCLE_BRANCH --set php.redis.ns=$CIRCLE_BRANCH --set web.ingress.host=$CIRCLE_BRANCH-east.95.215.71.23.nip.io --set php.tag=$CIRCLE_BRANCH --set web.tag=$CIRCLE_BRANCH --set timestamp="$(date +%s)" --set web.pullPolicy=Always --set php.pullPolicy=Always
 
       - run:
           name: WEST - Create Namespace && Deploy Release
-          command: kubectl config use-context kube-west && bash scripts/createNs.sh $CIRLCE_BRANCH && helm upgrade --install simple-api --namespace $CIRLCE_BRANCH ./helm-chart/ --set php.mysql.db=$CIRLCE_BRANCH --set php.redis.ns=$CIRLCE_BRANCH --set web.ingress.host=$CIRLCE_BRANCH-west.95.215.71.23.nip.io --set php.tag=$CIRLCE_BRANCH --set web.tag=$CIRLCE_BRANCH --set timestamp="$(date +%s)" --set web.pullPolicy=Always --set php.pullPolicy=Always
+          command: kubectl config use-context kube-west && bash scripts/createNs.sh $CIRCLE_BRANCH && helm upgrade --install simple-api --namespace $CIRCLE_BRANCH ./helm-chart/ --set php.mysql.db=$CIRCLE_BRANCH --set php.redis.ns=$CIRCLE_BRANCH --set web.ingress.host=$CIRCLE_BRANCH-west.95.215.71.23.nip.io --set php.tag=$CIRCLE_BRANCH --set web.tag=$CIRCLE_BRANCH --set timestamp="$(date +%s)" --set web.pullPolicy=Always --set php.pullPolicy=Always
 
   deployProduction:
     docker:
@@ -123,11 +123,11 @@ jobs:
 
       - run:
           name: EAST - Create Namespace && Deploy Release
-          command: kubectl config use-context kube-east && bash scripts/createNs.sh production && helm upgrade --install simple-api --namespace production ./helm-chart/ --set php.mysql.db=$CIRLCE_TAG --set php.redis.ns=$CIRLCE_TAG --set web.ingress.host=$CIRLCE_TAG-east.95.215.71.23.nip.io --set php.tag=$CIRLCE_TAG --set web.tag=$CIRLCE_TAG --set timestamp="$(date +%s)" --set web.pullPolicy=IfNotPresent --set php.pullPolicy=IfNotPresent
+          command: kubectl config use-context kube-east && bash scripts/createNs.sh production && helm upgrade --install simple-api --namespace production ./helm-chart/ --set php.mysql.db=$CIRCLE_TAG --set php.redis.ns=$CIRCLE_TAG --set web.ingress.host=$CIRCLE_TAG-east.95.215.71.23.nip.io --set php.tag=$CIRCLE_TAG --set web.tag=$CIRCLE_TAG --set timestamp="$(date +%s)" --set web.pullPolicy=IfNotPresent --set php.pullPolicy=IfNotPresent
 
       - run:
           name: WEST - Create Namespace && Deploy Release
-          command: kubectl config use-context kube-west && bash scripts/createNs.sh production && helm upgrade --install simple-api --namespace production ./helm-chart/ --set php.mysql.db=$CIRLCE_TAG --set php.redis.ns=$CIRLCE_TAG --set web.ingress.host=$CIRLCE_TAG-west.95.215.71.23.nip.io --set php.tag=$CIRLCE_TAG --set web.tag=$CIRLCE_TAG --set timestamp="$(date +%s)" --set web.pullPolicy=IfNotPresent --set php.pullPolicy=IfNotPresent
+          command: kubectl config use-context kube-west && bash scripts/createNs.sh production && helm upgrade --install simple-api --namespace production ./helm-chart/ --set php.mysql.db=$CIRCLE_TAG --set php.redis.ns=$CIRCLE_TAG --set web.ingress.host=$CIRCLE_TAG-west.95.215.71.23.nip.io --set php.tag=$CIRCLE_TAG --set web.tag=$CIRCLE_TAG --set timestamp="$(date +%s)" --set web.pullPolicy=IfNotPresent --set php.pullPolicy=IfNotPresent
 
 workflows:
   version: 2
