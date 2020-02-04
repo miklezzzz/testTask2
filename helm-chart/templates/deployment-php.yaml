@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app: simple-api
+    level: php
+    release: {{ .Release.Name }}
+  name: simple-api-php
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-api
+      level: php
+      release: {{ .Release.Name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: simple-api
+        level: php
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - env:
+        - name: APP_ENV
+          value: {{ .Values.php.app.env }}
+        - name: APP_SECRET
+          value: {{ .Values.php.app.secret }} 
+        - name: MYSQL_HOST
+          value: {{ .Values.php.mysql.host }}
+        - name: MYSQL_PORT
+          value: {{ .Values.php.mysql.port | quote }}
+        - name: MYSQL_USER
+          value: {{ .Values.php.mysql.user }}
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql
+              key: mysql-root-password
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql
+              key: mysql-root-password
+        - name: MYSQL_DB
+          value: {{ .Values.php.mysql.db }}
+        - name: MONGODB_URL
+          value: {{ .Values.php.mongo.url }}
+        - name: MONGODB_DB
+          value: {{ .Values.php.mongo.db }}
+        - name: REDIS_HOST
+          value: {{ .Values.php.redis.host }}
+        - name: REDIS_PORT
+          value: {{ .Values.php.redis.port | quote }}
+        - name: REDIS_DB
+          value: {{ .Values.php.redis.db | quote }}
+        - name: REDIS_NAMESPACE
+          value: {{ .Values.php.redis.ns }}
+        image: {{ .Values.php.image }}:{{ .Values.php.tag }}
+        imagePullPolicy: {{ .Values.php.pullPolicy }}
+        name: php
+        ports:
+        - containerPort: 9000
+          name: php
+          protocol: TCP
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

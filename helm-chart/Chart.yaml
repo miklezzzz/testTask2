@@ -1,0 +1,7 @@
+description: Simple-api application chart
+keywords:
+- php-fpm
+- nginx
+maintainers:
+name: simple-api
+version: 0.0.1

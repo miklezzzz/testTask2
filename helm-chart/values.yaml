@@ -1,0 +1,26 @@
+php:
+  image: miklezzzz/simple-api-php
+  tag: latest
+  pullPolicy: Always
+  app:
+    env: dev
+    secret: facd07d4b1355d67c294687e08efcc1a
+  mysql:
+    host: mysql
+    port: 3306
+    db: simple-api
+    user: simple-api
+  mongo:
+    url: "mongodb://mongodb:27017"
+    db: simple-api
+  redis:
+    port: 6379
+    db: "0"
+    host: redis-master
+    ns: foobar
+web:
+  image: miklezzzz/simple-api-web
+  tag: latest
+  pullPolicy: Always
+  ingress:
+    host: s-east.95.215.71.23.nip.io

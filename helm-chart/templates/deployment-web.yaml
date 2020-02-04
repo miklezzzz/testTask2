@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app: simple-api
+    level: nginx
+    release: {{ .Release.Name }}
+  name: simple-api-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-api
+      level: nginx
+      release: {{ .Release.Name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: simple-api
+        level: nginx
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - env:
+        image: {{ .Values.web.image }}:{{ .Values.web.tag }}
+        imagePullPolicy: {{ .Values.web.pullPolicy }}
+        name: nginx
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: simple-api
+    level: nginx
+    release: {{ .Release.Name }}
+  name: nginx
+spec:
+  ports:
+  - name: php
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: simple-api
+    level: nginx
+    release: {{ .Release.Name }}
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

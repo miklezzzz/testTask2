@@ -1,0 +1,68 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": never
+  labels:
+    app: simple-api
+    level: migration
+    release: {{ .Release.Name }}
+  name: migration
+spec:
+  backoffLimit: 5
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app: simple-api
+        level: migration
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - args:
+        - /bin/sh
+        - -ec
+        - 'php bin/console doctrine:database:create; php bin/console doctrine:migrations:migrate --no-interaction'
+        image: {{ .Values.php.image }}:{{ .Values.php.tag }} 
+        imagePullPolicy: Always
+        name: migration
+        env:
+        - name: APP_ENV
+          value: {{ .Values.php.app.env }}
+        - name: APP_SECRET
+          value: {{ .Values.php.app.secret }}
+        - name: MYSQL_HOST
+          value: {{ .Values.php.mysql.host }}
+        - name: MYSQL_PORT
+          value: {{ .Values.php.mysql.port | quote }}
+        - name: MYSQL_USER
+          value: {{ .Values.php.mysql.user }}
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql
+              key: mysql-root-password
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql
+              key: mysql-root-password
+        - name: MYSQL_DB
+          value: {{ .Values.php.mysql.db }}
+        - name: MONGODB_URL
+          value: {{ .Values.php.mongo.url }}
+        - name: MONGODB_DB
+          value: {{ .Values.php.mongo.db }}
+        - name: REDIS_HOST
+          value: {{ .Values.php.redis.host }}
+        - name: REDIS_PORT
+          value: {{ .Values.php.redis.port | quote }}
+        - name: REDIS_DB
+          value: {{ .Values.php.redis.db | quote }}
+        - name: REDIS_NAMESPACE
+          value: {{ .Values.php.redis.ns }}
+      restartPolicy: Never
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30

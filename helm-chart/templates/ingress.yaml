@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+  labels:
+    app: simple-api
+    level: nginx
+    release: {{ .Release.Name }}
+  name: nginx
+spec:
+  rules:
+  - host: {{ .Values.web.ingress.host }}
+    http:
+      paths:
+      - backend:
+          serviceName: nginx
+          servicePort: 80
+        path: /
+
