@@ -55,5 +55,6 @@ workflows:
           requires:
             - buildAndPush
           filters:
-            only:
-              - /release-.*/
+            branches:
+              only:
+                - /release-.*/
