@@ -42,7 +42,10 @@ jobs:
 
       - run:
           name: Create Namespace
-          command: bash scripts/createNs.sh $TAG
+          command: |
+                 if [ "$TAG" == "develop" ]; then echo 'export NAMESPACE=develop' >> $BASH_ENV; elif [[ "$TAG" != prodbuild* ]]; then echo 'export NAMESPACE=$TAG' >> $BASH_ENV; else echo 'export NAMESPACE=production' >> $BASH_ENV; fi
+                 kubectl config use-context kube-east
+                 bash scripts/createNs.sh $NAMESPACE
 
       - run:
           name: Test access to K8s
@@ -62,6 +65,5 @@ workflows:
             branches:
               ignore:
                 - master
-      - deploy:
-          requires:
-            - buildAndPush
+                - develop
+      - deploy
