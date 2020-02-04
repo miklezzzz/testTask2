@@ -45,17 +45,6 @@ jobs:
 
 workflows:
   version: 2
-  build-push:
+  build-deploy:
     jobs:
-      - buildAndPush
-      - deployToStage
-  to-staging:
-    jobs:
-      - buildAndPush
       - deployToStage:
-          requires:
-            - buildAndPush
-          filters:
-            branches:
-              only:
-                - /release-.*/
