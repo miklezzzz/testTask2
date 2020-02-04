@@ -42,17 +42,11 @@ jobs:
           name: Set the tag for the image
           command: if [ "${CIRCLE_BRANCH}" = "develop" ]; then echo 'export TAG=develop' >> $BASH_ENV; elif [[ "${CIRCLE_BRANCH}" != release-* ]]; then echo 'export TAG=release-$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV; elif [[ "${CIRCLE_TAG}" == prodbuild* ]]; then echo 'export TAG=$CIRCLE_TAG-$CIRCLE_BUILD_NUM' >> $BASH_ENV; fi
       - run:
-          name: Create Namespace
-          command: if [ "$TAG" == "develop" ]; then echo 'export NAMESPACE=develop' >> $BASH_ENV; elif [[ "$TAG" != prodbuild* ]]; then echo 'export NAMESPACE=$TAG' >> $BASH_ENV; else echo 'export NAMESPACE=production' >> $BASH_ENV; fi && kubectl config use-context kube-east && bash scripts/createNs.sh $NAMESPACE
-
+          name: Get Namespace name
+          command: if [ "$TAG" == "develop" ]; then echo 'export NAMESPACE=develop' >> $BASH_ENV; elif [[ "$TAG" != prodbuild* ]]; then echo 'export NAMESPACE=$TAG' >> $BASH_ENV; else echo 'export NAMESPACE=production' >> $BASH_ENV; fi
       - run:
-          name: Test access to K8s
-          command: |
-            kubectl config use-context kube-east
-            kubectl get nodes --insecure-skip-tls-verify=true
-            kubectl config use-context kube-west
-            kubectl get nodes --insecure-skip-tls-verify=true
-            echo $TAG
+          name: Create Namespace
+          command: kubectl config use-context kube-east && bash scripts/createNs.sh $NAMESPACE
 
 workflows:
   version: 2
@@ -63,4 +57,5 @@ workflows:
             branches:
               ignore:
                 - master
+                - develop
       - deploy
