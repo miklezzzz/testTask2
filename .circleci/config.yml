@@ -45,6 +45,7 @@ jobs:
           name: Set the tag for the image
           command: |
                  if [ "$CIRCLE_BRANCH" == "develop" ]; then echo 'export TAG=develop' >> $BASH_ENV; elif [[ "$CIRCLE_BRANCH" != release-* ]]; then echo 'export TAG=release-$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV; elif [[ "$CIRCLE_TAG" == prodbuild* ]]; then echo 'export TAG=$CIRCLE_TAG-$CIRCLE_BUILD_NUM' >> $BASH_ENV; fi
+                 echo $CIRCLE_BRANCH
                  echo $TAG
                  echo $NAMESPACE
 
