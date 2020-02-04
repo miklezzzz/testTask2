@@ -8,7 +8,7 @@ jobs:
       - setup_remote_docker:
       - run:
           name: Set the tag for the image
-          command: if [ "$CIRCLE_BRANCH" == "develop" ]; then echo 'export TAG=develop' >> $BASH_ENV; elif [[ "$CIRCLE_BRANCH" == release-* ]]; then echo 'export TAG=${CIRCLE_BRANCH}' >> $BASH_ENV; elif [[ "$CIRCLE_TAG" == prodbuild* ]]; then echo 'export TAG=$CIRCLE_TAG' >> $BASH_ENV; fi
+          command: if [ "$CIRCLE_BRANCH" == "development" ]; then echo 'export TAG=development' >> $BASH_ENV; elif [[ "$CIRCLE_BRANCH" == release-* ]]; then echo 'export TAG=${CIRCLE_BRANCH}' >> $BASH_ENV; elif [[ "$CIRCLE_TAG" == prodbuild* ]]; then echo 'export TAG=$CIRCLE_TAG' >> $BASH_ENV; fi
       - run:
           name: Build and push images
           command: |
@@ -157,7 +157,7 @@ workflows:
           filters:
             branches:
               only:
-                - develop
+                - development
       - deployStaging:
           requires:
             - buildAndPush
