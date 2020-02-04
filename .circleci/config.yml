@@ -136,21 +136,17 @@ workflows:
       - lint:
           filters:
             branches:
-              ignore:
-                - master
+              ignore: master
       - test:
           filters:
             branches:
-              ignore:
-                - master
+              ignore: master
       - buildAndPush:
           filters:
             tags:
-              only:
-                - /prodbuild-.*/
+              only: /^prodbuild.*/
             branches:
-              ignore:
-                - master
+              ignore: master
           requires:
             - lint
             - test
@@ -173,8 +169,6 @@ workflows:
             - buildAndPush
           filters:
             tags:
-              only:
-                - /prodbuild-.*/
+              only: /^prodbuild.*/
             branches:
-              only:
-                - master
+              ignore: /.*/
