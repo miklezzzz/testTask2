@@ -6,7 +6,7 @@ metadata:
     app: simple-api
     level: nginx
     release: {{ .Release.Name }}
-  name: simple-api-nginx
+  name: simple-api-web
 spec:
   replicas: 1
   selector:
