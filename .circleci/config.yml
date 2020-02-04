@@ -137,10 +137,14 @@ workflows:
           filters:
             branches:
               ignore: master
+            tags:
+              only: /^prodbuild.*/
       - test:
           filters:
             branches:
               ignore: master
+            tags:
+              only: /^prodbuild.*/
       - buildAndPush:
           filters:
             tags:
