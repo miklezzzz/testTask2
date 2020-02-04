@@ -2,7 +2,7 @@
 
 TAG=$1
 
-if [ "$TAG" == "develop"]; then echo 'export NAMESPACE=develop' >> $BASH_ENV; elif [[ "$TAG" =! prodbuild* ]]; then echo 'export NAMESPACE=$TAG' >> $BASH_ENV; else echo 'export NAMESPACE=production' >> $BASH_ENV; fi
+if [ "$TAG" == "develop"]; then echo 'export NAMESPACE=develop' >> $BASH_ENV; elif [[ "$TAG" != prodbuild* ]]; then echo 'export NAMESPACE=$TAG' >> $BASH_ENV; else echo 'export NAMESPACE=production' >> $BASH_ENV; fi
 kubectl config use-context kube-east
 kubectl get ns $NAMESPACE --insecure-skip-tls-verify=true
 if [ $? -ne 0]; then kubectl create ns $NAMESPACE --insecure-skip-tls-verify=true && kubectl get secret -n databases mysql -o yaml --export --insecure-skip-tls-verify=true | kubectl apply -n $NAMESPACE --insecure-skip-tls-verify=true -f - && cat <<EOF | kubectl appply -n $NAMESPACE -f -
