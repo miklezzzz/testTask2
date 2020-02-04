@@ -40,16 +40,10 @@ jobs:
                  sudo curl https://get.helm.sh/helm-v3.0.3-linux-amd64.tar.gz -o /tmp/helm-v3.0.3-linux-amd64.tar.gz && cd /tmp && tar zxvf helm-v3.0.3-linux-amd64.tar.gz && sudo cp -v ./linux-amd64/helm /usr/local/bin/helm
       - run:
           name: Set the tag for the image
-          command: |
-                 if [ "${CIRCLE_BRANCH}" == "develop" ]; then echo 'export TAG=develop' >> $BASH_ENV; elif [[ "${CIRCLE_BRANCH}" != release-* ]]; then echo 'export TAG=release-$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV; elif [[ "${CIRCLE_TAG}" == prodbuild* ]]; then echo 'export TAG=$CIRCLE_TAG-$CIRCLE_BUILD_NUM' >> $BASH_ENV; fi
-                 echo $TAG
-                 echo $NAMESPACE
+          command: if [ "${CIRCLE_BRANCH}" == "develop" ]; then echo 'export TAG=develop' >> $BASH_ENV; elif [[ "${CIRCLE_BRANCH}" != release-* ]]; then echo 'export TAG=release-$(cat VERSION)-$CIRCLE_BUILD_NUM' >> $BASH_ENV; elif [[ "${CIRCLE_TAG}" == prodbuild* ]]; then echo 'export TAG=$CIRCLE_TAG-$CIRCLE_BUILD_NUM' >> $BASH_ENV; fi
       - run:
           name: Create Namespace
-          command: |
-                 if [ "$TAG" == "develop" ]; then echo 'export NAMESPACE=develop' >> $BASH_ENV; elif [[ "$TAG" != prodbuild* ]]; then echo 'export NAMESPACE=$TAG' >> $BASH_ENV; else echo 'export NAMESPACE=production' >> $BASH_ENV; fi
-                 kubectl config use-context kube-east
-                 bash scripts/createNs.sh $NAMESPACE
+          command: if [ "$TAG" == "develop" ]; then echo 'export NAMESPACE=develop' >> $BASH_ENV; elif [[ "$TAG" != prodbuild* ]]; then echo 'export NAMESPACE=$TAG' >> $BASH_ENV; else echo 'export NAMESPACE=production' >> $BASH_ENV; fi && kubectl config use-context kube-east && bash scripts/createNs.sh $NAMESPACE
 
       - run:
           name: Test access to K8s
