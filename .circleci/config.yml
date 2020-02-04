@@ -32,9 +32,9 @@ jobs:
       - run:
           name: Prepare kubeconfig
           command: |
-                 sed -i 's/east-k8s/$host/' ./.kube/config
-                 sed -i 's/west-k8s/$host/' ./.kube/config
-                 sed -i 's/admin-token/$token/' ./.kube/config
+                 sed -i "s/east-k8s/$host/" ./.kube/config
+                 sed -i "s/west-k8s/$host/" ./.kube/config
+                 sed -i "s/admin-token/$token/" ./.kube/config
                  mkdir -p ~/.kube && cp ./.kube/config ~/.kube/config
       - run:
           name: Test access to K8s
