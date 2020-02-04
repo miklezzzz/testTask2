@@ -51,6 +51,7 @@ workflows:
       - deployToStage
   to-staging:
     jobs:
+      - buildAndPush
       - deployToStage:
           requires:
             - buildAndPush
